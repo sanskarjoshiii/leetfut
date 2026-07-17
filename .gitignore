@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+DEPLOYMENT.md
+bun.lock
 
 # next.js
 /.next/
