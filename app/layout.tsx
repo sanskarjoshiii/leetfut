@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { SITE_URL } from "@/lib/site";
 
 // Umami Cloud (visitors + country/region breakdown, viewed on the Umami
@@ -94,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <Analytics />
+        <GoogleAnalytics />
         {UMAMI_WEBSITE_ID && (
           <Script
             src="https://cloud.umami.is/script.js"
