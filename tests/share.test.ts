@@ -1,0 +1,141 @@
+import { describe, expect, it } from "vitest";
+import type { Card } from "@/lib/scoring/types";
+import {
+  cardUrl,
+  duelIntentUrl,
+  duelSharePayload,
+  duelShareMessage,
+  duelUrl,
+  intentUrl,
+  nativeSharePayload,
+  shareMessage,
+  shareText,
+} from "@/lib/share";
+
+// We test the share DECISIONS: correct platform endpoints, well-formed encoded
+// URLs, stable per-login text, brag-led message. Not the React wiring.
+
+const card = (over: Partial<Card> = {}): Card =>
+  ({
+    login: "torvalds",
+    name: "Linus Torvalds",
+    avatarUrl: "https://example.com/a.png",
+    country: "us",
+    club: "legends",
+    stats: { pac: 74, sho: 97, pas: 90, dri: 69, def: 65, phy: 96 },
+    position: "ST",
+    family: "Forward",
+    baseOVR: 88,
+    overall: 95,
+    finish: "icon",
+    finishLabel: "ICON",
+    archetype: "Galáctico",
+    archetypeBlurb: "hall-of-fame maintainer",
+    legacy: { L: 1 },
+    report: {
+      skillMoves: 3,
+      weakFoot: 4,
+      workRate: { attack: "High", defense: "Med" },
+      style: "Relentless",
+      reasons: { skillMoves: "", weakFoot: "", workRate: "", style: "" },
+      playstyles: [],
+      metrics: [],
+    },
+    ...over,
+  }) as Card;
+
+describe("share service", () => {
+  it("builds the canonical card URL from the login, encoding the displayed flag", () => {
+    expect(cardUrl(card())).toBe("https://leetfut.com/torvalds?country=us");
+  });
+
+  it("omits the country param when the card has no flag", () => {
+    expect(cardUrl(card({ country: "" }))).toBe("https://leetfut.com/torvalds");
+  });
+
+  it("X intent uses /intent/tweet (NOT /intent/post) and carries url + hashtag", () => {
+    const u = intentUrl("x", card());
+    expect(u).toContain("https://twitter.com/intent/tweet?");
+    expect(u).not.toContain("/intent/post");
+    expect(u).toContain("hashtags=LeetFut");
+    expect(u).toContain(encodeURIComponent("https://leetfut.com/torvalds?country=us"));
+  });
+
+  it("LinkedIn intent uses share-offsite with only the url (preview from OG)", () => {
+    const u = intentUrl("linkedin", card());
+    expect(u).toContain("linkedin.com/sharing/share-offsite/?url=");
+    expect(u).toContain(encodeURIComponent("https://leetfut.com/torvalds?country=us"));
+  });
+
+  it("WhatsApp intent puts text + url in the message", () => {
+    const u = intentUrl("whatsapp", card());
+    expect(u).toContain("api.whatsapp.com/send?text=");
+    expect(decodeURIComponent(u)).toContain("leetfut.com/torvalds?country=us");
+  });
+
+  it("share text is deterministic per login and mentions the rating", () => {
+    const a = shareText(card());
+    const b = shareText(card());
+    expect(a).toBe(b);
+    expect(a).toContain("95");
+  });
+
+  it("different logins can select different lines", () => {
+    const a = shareText(card({ login: "torvalds" }));
+    const b = shareText(card({ login: "sindresorhus" }));
+    // both are valid lines; at least one should differ across a sample of logins
+    const c = shareText(card({ login: "gaearon" }));
+    expect(new Set([a, b, c]).size).toBeGreaterThan(1);
+  });
+
+  it("native payload carries title, brag-led text, and url", () => {
+    const p = nativeSharePayload(card());
+    expect(p.title).toBe("LeetFut");
+    expect(p.url).toBe("https://leetfut.com/torvalds?country=us");
+    expect(p.text).toBe(shareMessage(card()));
+    expect(p.text).toContain("get scouted");
+  });
+
+  it("share message is the text plus the CTA", () => {
+    expect(shareMessage(card())).toContain(shareText(card()));
+  });
+});
+
+describe("duel share service", () => {
+  it("builds the canonical duel URL from both corners", () => {
+    expect(duelUrl("younesfdj", "torvalds")).toBe("https://leetfut.com/younesfdj/vs/torvalds");
+  });
+
+  it("message is deterministic per matchup, @-mentions the opponent, and never spoils the score", () => {
+    const a = duelShareMessage("younesfdj", "torvalds");
+    expect(a).toBe(duelShareMessage("younesfdj", "torvalds"));
+    expect(a).toContain("@torvalds");
+    // Score-free by design — the poster and page never reveal the result.
+    expect(a).not.toMatch(/\d+\s*[–-]\s*\d+/);
+  });
+
+  it("swapping corners can change the line (matchup-seeded, not opponent-only)", () => {
+    const lines = new Set([
+      duelShareMessage("a", "b"),
+      duelShareMessage("b", "a"),
+      duelShareMessage("c", "d"),
+      duelShareMessage("e", "f"),
+    ]);
+    expect(lines.size).toBeGreaterThan(1);
+  });
+
+  it("X intent uses /intent/tweet (NOT /intent/post) with the duel url + hashtag", () => {
+    const u = duelIntentUrl("younesfdj", "torvalds");
+    expect(u).toContain("https://twitter.com/intent/tweet?");
+    expect(u).not.toContain("/intent/post");
+    expect(u).toContain("hashtags=LeetFut");
+    expect(u).toContain(encodeURIComponent("https://leetfut.com/younesfdj/vs/torvalds"));
+  });
+
+  it("native payload carries the title, the message, and the duel url", () => {
+    const p = duelSharePayload("younesfdj", "torvalds");
+    expect(p.title).toBe("LeetFut Duel");
+    expect(p.url).toBe("https://leetfut.com/younesfdj/vs/torvalds");
+    expect(p.text).toBe(duelShareMessage("younesfdj", "torvalds"));
+  });
+});

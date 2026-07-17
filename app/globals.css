@@ -1,0 +1,402 @@
+@import "tailwindcss";
+
+/* ============================================================
+   LeetFut Design System — charcoal spine × LeetCode amber action
+   The keystone module: every screen reads from these tokens.
+   ============================================================ */
+@theme {
+  --font-display: var(--font-bebas);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+  --font-fantasy: var(--font-aldo);
+  --font-serif: var(--font-garamond);
+
+  /* Charcoal spine — warm near-black midnight / surfaces / gray / ink / gold */
+  --color-bg: #0c0b0a;
+  --color-bg-deep: #060605;
+  --color-panel: #151412;
+  --color-surface: #151412;
+  --color-surface-2: #1e1c1a;
+  --color-line: #2c2a27;
+  --color-gray: #b3b3b3;
+
+  --color-ink: #f5f5f4;
+  --color-ink-dim: #d6d3d1;
+  --color-ink-soft: #a8a29e;
+  --color-ink-faint: #b3b3b3;
+  --color-ink-mute: #6b6660;
+
+  /* LeetCode amber — "the action" */
+  --color-brand: #ffa116;
+  --color-brand-hi: #ffb838;
+  --color-brand-mid: #e8890c;
+  --color-brand-deep: #a85f00;
+
+  /* Gold — prestige metal (reserved) */
+  --color-gold: #d4af37;
+  --color-gold-hi: #e9cc74;
+  --color-gold-deep: #b48811;
+
+  /* motion */
+  --animate-flood: flood 18s ease-in-out infinite alternate;
+  --animate-glow: glow 3.4s ease-in-out infinite;
+  --animate-card-reveal: rise-soft 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-walkout: walkout 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-rise-soft: rise-soft 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-spotlight: spotlight 1.1s ease-out both;
+  --animate-pun-in: pun-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-juggle: juggle 1.4s ease-in-out infinite;
+  --animate-ball-spin: ball-spin 1.4s linear infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-pop: pop 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-flag-raise: flag-raise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-league-glow: league-glow 2.6s ease-in-out infinite;
+}
+
+/* the League CTA's breathing amber halo — the "glow among all" the entry wears */
+@keyframes league-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(255, 161, 22, 0.32), 0 8px 26px -10px rgba(255, 161, 22, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(255, 161, 22, 0.6), 0 12px 34px -6px rgba(255, 161, 22, 0.78);
+  }
+}
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  ::selection {
+    background: var(--color-brand);
+    color: #1a1305;
+  }
+  ::placeholder {
+    color: var(--color-ink-mute);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  /* Bebas is all-caps by nature; keep its tracking honest */
+  .font-display {
+    letter-spacing: 0.01em;
+  }
+}
+
+/* ---- background flood ---- */
+@keyframes flood {
+  0% {
+    transform: translate(-52%, -2%);
+  }
+  100% {
+    transform: translate(-48%, 2%);
+  }
+}
+
+/* ---- result card ambient glow pulse ---- */
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* ---- THE DUEL: mirrored walkouts — each corner enters from its own side ---- */
+@keyframes walkout-left {
+  0% {
+    transform: translateX(-72px) translateY(30px) rotate(-4deg) scale(0.9);
+    opacity: 0;
+    filter: brightness(0.4) saturate(0.6);
+  }
+  55% {
+    opacity: 1;
+  }
+  70% {
+    filter: brightness(1.25) saturate(1.1);
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(0) scale(1);
+    opacity: 1;
+    filter: brightness(1) saturate(1);
+  }
+}
+@keyframes walkout-right {
+  0% {
+    transform: translateX(72px) translateY(30px) rotate(4deg) scale(0.9);
+    opacity: 0;
+    filter: brightness(0.4) saturate(0.6);
+  }
+  55% {
+    opacity: 1;
+  }
+  70% {
+    filter: brightness(1.25) saturate(1.1);
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(0) scale(1);
+    opacity: 1;
+    filter: brightness(1) saturate(1);
+  }
+}
+
+/* a stat row resolving in the shootout — snaps in with a flash of its winner */
+@keyframes gf-row-resolve {
+  0% {
+    opacity: 0;
+    transform: translateY(7px) scale(0.96);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* the corner panel (radar, scout notes, chips) sweeps up as the walkouts land */
+@keyframes gf-radar-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.82) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* scoreboard digit tick — pops as a goal goes in */
+@keyframes gf-score-tick {
+  0% {
+    transform: translateY(-40%) scale(1.25);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ---- THE WALKOUT: card rises out of darkness into the spotlight ---- */
+@keyframes walkout {
+  0% {
+    transform: translateY(46px) scale(0.9);
+    opacity: 0;
+    filter: brightness(0.4) saturate(0.6);
+  }
+  55% {
+    opacity: 1;
+  }
+  70% {
+    filter: brightness(1.25) saturate(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes rise-soft {
+  0% {
+    transform: translateY(22px) scale(0.96);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* spotlight beam bloom behind the card on reveal */
+@keyframes spotlight {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.4);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.85;
+    transform: translateX(-50%) scaleY(1);
+  }
+}
+
+/* loading pun line entrance */
+@keyframes pun-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* mascot juggling the ball */
+@keyframes juggle {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+@keyframes ball-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* gold shimmer sweep for prestige accents */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* tier underline draws out from center under the scout-report name */
+@keyframes gf-underline {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* one-shot tier-accent shimmer sweep across the scout-report name on appear */
+@keyframes gf-name-shimmer {
+  0% {
+    background-position: 130% 0;
+  }
+  60%,
+  100% {
+    background-position: -20% 0;
+  }
+}
+
+/* popover entrance — country picker dropdown rises + fades in from its anchor */
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---- duel fixture plate ---- */
+/* a floodlight sheen that crosses the plate once, then rests — the long tail
+   keeps the sweep rare enough to catch the eye without nagging it */
+@keyframes duel-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  9%,
+  100% {
+    transform: translateX(110%);
+  }
+}
+
+/* the kickoff dot on the centre spot, waiting for the whistle */
+@keyframes ball-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.7);
+    opacity: 0.6;
+  }
+}
+
+/* gentle float for hero card/mascot */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* the assistant-referee's flag swings up from their side — the offside call (404) */
+@keyframes flag-raise {
+  0% {
+    transform: rotate(-58deg);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  78% {
+    transform: rotate(7deg);
+  }
+  100% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* contribution-graph shimmer used as a brand motif */
+.gf-grid-cell {
+  animation: gf-cell var(--gf-dur, 3s) ease-in-out infinite;
+}
+@keyframes gf-cell {
+  0%,
+  100% {
+    opacity: 0.18;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Card signature (leetfut.com + @handle) — hidden on the live card, painted only
+   into exported images. CardActions / CardImageSync capture an off-screen clone
+   tagged `.leetfut-capturing`, which reveals it. See lib/capture.ts. */
+.leetfut-signature {
+  display: none;
+}
+.leetfut-capturing .leetfut-signature {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

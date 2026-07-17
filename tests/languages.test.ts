@@ -1,0 +1,182 @@
+import { describe, expect, it } from "vitest";
+import { LANGUAGE_SLUGS, languageLogoUrl, logoSlugFor, rankLanguages, topLanguageLogo } from "@/lib/languages";
+
+// We test the language DECISIONS: deterministic ranking with markup demotion, the
+// GitHub-name→Devicon-id map (incl. display names + the Go wordmark), and that the
+// logo always matches the headline language (no fall-through to a different icon).
+
+const repos = (...langs: (string | null)[]) => langs.map((language) => ({ language }));
+
+describe("rankLanguages", () => {
+  it("orders by repo count, descending", () => {
+    expect(rankLanguages(repos("Go", "TypeScript", "TypeScript", "TypeScript", "Go"))).toEqual([
+      "TypeScript",
+      "Go",
+    ]);
+  });
+
+  it("breaks count ties by name, ascending (deterministic)", () => {
+    expect(rankLanguages(repos("Ruby", "Go", "Python"))).toEqual(["Go", "Python", "Ruby"]);
+  });
+
+  it("ignores repos with no primary language", () => {
+    expect(rankLanguages(repos("Rust", null, "Rust", null))).toEqual(["Rust"]);
+  });
+
+  it("demotes styling/markup below real programming languages", () => {
+    // GitHub reports a byte-heavy repo as CSS; Python should still headline.
+    expect(
+      rankLanguages(repos("CSS", "CSS", "CSS", "CSS", "Python", "Python", "Python", "HTML")),
+    ).toEqual(["Python", "CSS", "HTML"]);
+  });
+
+  it("keeps styling languages when there's no programming language", () => {
+    expect(rankLanguages(repos("CSS", "CSS", "HTML"))).toEqual(["CSS", "HTML"]);
+  });
+
+  it("returns an empty list when there are no languages", () => {
+    expect(rankLanguages(repos(null, null))).toEqual([]);
+    expect(rankLanguages([])).toEqual([]);
+  });
+});
+
+describe("logoSlugFor", () => {
+  it("maps languages to Devicon ids, case-insensitively", () => {
+    expect(logoSlugFor("TypeScript")).toBe("typescript-original");
+    expect(logoSlugFor("python")).toBe("python-original");
+    expect(logoSlugFor("Rust")).toBe("rust-original"); // covered now (was a catalog miss)
+  });
+
+  it("maps GitHub display names to Devicon dirs", () => {
+    expect(logoSlugFor("C++")).toBe("cplusplus-original");
+    expect(logoSlugFor("C#")).toBe("csharp-original");
+  });
+
+  it("uses the Go wordmark (not the gopher)", () => {
+    expect(logoSlugFor("Go")).toBe("go-original-wordmark");
+  });
+
+  it("returns null for languages Devicon doesn't cover", () => {
+    // Fortran and COBOL used to sit here; both are covered now, so this falls back
+    // to languages Devicon still genuinely lacks.
+    for (const name of ["Assembly", "Ada", "Brainfuck"]) {
+      expect(logoSlugFor(name)).toBeNull();
+    }
+  });
+
+  it("resolves languages that used to headline a card with no logo", () => {
+    expect(logoSlugFor("Elm")).toBe("elm-original");
+    expect(logoSlugFor("Nix")).toBe("nixos-original");
+    expect(logoSlugFor("Gleam")).toBe("gleam-original");
+    expect(logoSlugFor("Astro")).toBe("astro-original");
+    expect(logoSlugFor("Groovy")).toBe("groovy-original");
+    expect(logoSlugFor("MATLAB")).toBe("matlab-original");
+    expect(logoSlugFor("Fortran")).toBe("fortran-original");
+    expect(logoSlugFor("COBOL")).toBe("cobol-original");
+  });
+
+  it("maps GitHub display names that differ from the Devicon dir", () => {
+    expect(logoSlugFor("F#")).toBe("fsharp-original");
+    expect(logoSlugFor("Visual Basic .NET")).toBe("visualbasic-original");
+    expect(logoSlugFor("WebAssembly")).toBe("wasm-original");
+  });
+
+  it("uses the tool's mark where that's the language's canonical logo", () => {
+    expect(logoSlugFor("Vim Script")).toBe("vim-original");
+    expect(logoSlugFor("Emacs Lisp")).toBe("emacs-original");
+    expect(logoSlugFor("GDScript")).toBe("godot-original");
+    expect(logoSlugFor("HCL")).toBe("terraform-original");
+    expect(logoSlugFor("PLpgSQL")).toBe("postgresql-original");
+  });
+
+  it("uses GraphQL's -plain variant (Devicon ships no -original, which would 404)", () => {
+    expect(logoSlugFor("GraphQL")).toBe("graphql-plain");
+    expect(languageLogoUrl("graphql-plain")).toBe(
+      "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg",
+    );
+  });
+});
+
+describe("topLanguageLogo", () => {
+  it("returns the headline language's own logo", () => {
+    expect(topLanguageLogo(["TypeScript", "Rust"])).toEqual({ name: "TypeScript", slug: "typescript-original" });
+    expect(topLanguageLogo(["Rust", "TypeScript"])).toEqual({ name: "Rust", slug: "rust-original" });
+  });
+
+  it("does NOT fall back — a top language Devicon lacks gets no logo", () => {
+    expect(topLanguageLogo(["Assembly", "TypeScript"])).toBeNull();
+  });
+
+  it("uses a styling logo only when there's no programming language", () => {
+    expect(topLanguageLogo(["CSS", "HTML"])).toEqual({ name: "CSS", slug: "css3-original" });
+  });
+
+  it("returns null for an empty list", () => {
+    expect(topLanguageLogo([])).toBeNull();
+  });
+});
+
+describe("languageLogoUrl", () => {
+  it("builds the Devicon jsDelivr SVG path (dir = first segment)", () => {
+    expect(languageLogoUrl("go-original-wordmark")).toBe(
+      "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original-wordmark.svg",
+    );
+    expect(languageLogoUrl("cplusplus-original")).toBe(
+      "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg",
+    );
+  });
+
+  it("overrides C to the flat catalog (Devicon's c-original clashes with the card)", () => {
+    expect(languageLogoUrl("c-original")).toBe(
+      "https://cdn.jsdelivr.net/npm/programming-languages-logos/src/c/c.png",
+    );
+  });
+
+  // The dir is the id's FIRST SEGMENT, so an id whose dir itself contains a hyphen
+  // silently resolves to the wrong dir and 404s. Devicon really ships one such icon
+  // ("dot-net" → dir "dot"), so this guards every future addition, not just today's.
+  it("every catalog id is a hyphenless dir + a real Devicon variant", () => {
+    const ID = /^[a-z0-9]+-(original|plain|line)(-wordmark)?$/;
+    for (const [name, slug] of Object.entries(LANGUAGE_SLUGS)) {
+      if (slug === "rescript") continue; // override-only: never hits the Devicon path
+      expect(slug, `${name} → ${slug}`).toMatch(ID);
+    }
+  });
+});
+
+describe("headline demotion, extended", () => {
+  it("keeps infra-as-code from headlining a real programming language", () => {
+    expect(rankLanguages(repos("HCL", "HCL", "HCL", "Go", "Go"))).toEqual(["Go", "HCL"]);
+  });
+
+  it("still headlines infra-as-code when it's all the dev has", () => {
+    expect(rankLanguages(repos("HCL", "HCL", "Terraform"))).toEqual(["HCL", "Terraform"]);
+  });
+
+  it("demotes newly-listed templates and prose", () => {
+    expect(rankLanguages(repos("Jinja", "Jinja", "Python"))).toEqual(["Python", "Jinja"]);
+    expect(rankLanguages(repos("Blade", "Blade", "PHP"))).toEqual(["PHP", "Blade"]);
+    expect(rankLanguages(repos("AsciiDoc", "AsciiDoc", "Rust"))).toEqual(["Rust", "AsciiDoc"]);
+  });
+
+  it("treats Nix as a real language, not config", () => {
+    expect(rankLanguages(repos("Nix", "Nix", "Dockerfile", "Dockerfile"))).toEqual(["Nix", "Dockerfile"]);
+  });
+});
+
+describe("ReScript (Devicon lacks it — overridden to Material Icon Theme)", () => {
+  it("resolves the slug and headlines its own logo", () => {
+    expect(logoSlugFor("ReScript")).toBe("rescript");
+    expect(topLanguageLogo(["ReScript", "TypeScript"])).toEqual({ name: "ReScript", slug: "rescript" });
+  });
+
+  it("ranks above styling languages like any real language", () => {
+    expect(rankLanguages(repos("CSS", "CSS", "ReScript"))).toEqual(["ReScript", "CSS"]);
+  });
+
+  it("points at a real, full-colour logo URL", () => {
+    expect(languageLogoUrl("rescript")).toBe(
+      "https://cdn.jsdelivr.net/gh/PKief/vscode-material-icon-theme/icons/rescript.svg",
+    );
+  });
+});
