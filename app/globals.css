@@ -559,3 +559,54 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---- content / legal pages (About, FAQ, Privacy, Terms, Contact) ---- */
+.legal-prose {
+  color: var(--color-ink-dim);
+  font-size: 15.5px;
+  line-height: 1.72;
+}
+.legal-prose h2 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  font-size: 23px;
+  letter-spacing: 0.02em;
+  margin: 30px 0 10px;
+}
+.legal-prose h3 {
+  color: var(--color-ink);
+  font-weight: 700;
+  font-size: 16px;
+  margin: 22px 0 6px;
+}
+.legal-prose p {
+  margin: 0 0 14px;
+}
+.legal-prose ul {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  list-style: disc;
+}
+.legal-prose li {
+  margin: 0 0 7px;
+}
+.legal-prose a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+.legal-prose a:hover {
+  color: var(--color-brand-hi);
+}
+.legal-prose strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.legal-prose code {
+  font-family: var(--font-mono);
+  background: var(--color-surface-2);
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 13.5px;
+}

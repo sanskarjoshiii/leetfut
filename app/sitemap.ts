@@ -4,9 +4,16 @@ import { SITE_URL as BASE } from "@/lib/site";
 
 // Home + the showcase profiles (real, indexable example cards). Per-user pages
 // are generated on demand, so they aren't enumerated here.
+const CONTENT_PAGES = ["about", "faq", "contact", "privacy", "terms"];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: BASE, changeFrequency: "weekly", priority: 1 },
+    ...CONTENT_PAGES.map((path) => ({
+      url: `${BASE}/${path}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
     ...SAMPLE_LOGINS.map((login) => ({
       url: `${BASE}/${login}`,
       changeFrequency: "weekly" as const,

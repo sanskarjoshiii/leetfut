@@ -7,6 +7,7 @@ import CardFan from "@/components/CardFan";
 import LoadingScreen from "@/components/LoadingScreen";
 import dynamic from "next/dynamic";
 import FooterCredit from "@/components/FooterCredit";
+import FooterLinks from "@/components/FooterLinks";
 import InspiredBy from "@/components/InspiredBy";
 import GithubStar from "@/components/GithubStar";
 import ScoutGraph from "@/components/ScoutGraph";
@@ -79,7 +80,8 @@ export default function AppShell({
         {/* users-over-time sparkline — below the card fan, above the footer
             credit / inspired-by badge. Renders nothing until history exists. */}
         <ScoutGraph history={scoutHistory} />
-        <footer className="relative z-[2] mt-auto flex flex-none items-center justify-center p-[clamp(12px,2.6vh,24px)]">
+        <footer className="relative z-[2] mt-auto flex flex-none flex-col items-center gap-[10px] p-[clamp(12px,2.6vh,24px)]">
+          <FooterLinks />
           <FooterCredit />
         </footer>
       </main>
