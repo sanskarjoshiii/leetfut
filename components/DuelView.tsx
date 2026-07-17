@@ -8,7 +8,6 @@ import PlayerCard from "./PlayerCard";
 import StatRadar from "./StatRadar";
 import TiltCard from "./TiltCard";
 import VsBurst from "./VsBurst";
-import Mascot from "./Mascot";
 import FooterCredit from "./FooterCredit";
 import GithubStar from "./GithubStar";
 import InspiredBy from "./InspiredBy";
@@ -318,8 +317,7 @@ export default function DuelView({
             time. Draws keep the house lights even. */}
         <div
           aria-hidden
-          className="pointer-events-none fixed inset-0 -z-10"
-          style={{ background: "var(--color-bg)" }}
+          className="pointer-events-none fixed inset-0 -z-10 bg-bg/55"
         >
           <div
             className="absolute inset-y-0 left-0 w-[62%] transition-opacity duration-700"
@@ -351,7 +349,12 @@ export default function DuelView({
               />
               GET SCOUTED
             </Link>
-            <Mascot size={40} kick={false} ball={false} animate={false} />
+            <img
+              src="/leetfutlogo.png"
+              alt="LeetFut"
+              draggable={false}
+              className="h-[38px] w-auto select-none rounded-[8px]"
+            />
           </div>
           <GithubStar stars={stars} />
         </div>
