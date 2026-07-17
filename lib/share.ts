@@ -130,7 +130,7 @@ export function duelSharePayload(
 // Same rule as the Duel: score-free, because the pitch is the payoff.
 
 export function derbyUrl(home: string[], away: string[]): string {
-  return `${SITE}/derby?home=${encodeURIComponent(home.join(","))}&away=${encodeURIComponent(away.join(","))}`;
+  return `${SITE_URL}/derby?home=${encodeURIComponent(home.join(","))}&away=${encodeURIComponent(away.join(","))}`;
 }
 
 const derbyLines = (): string[] => [
