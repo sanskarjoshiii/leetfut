@@ -8,6 +8,7 @@ import StoryFrame from "./StoryFrame";
 import CardActions from "./CardActions";
 import DuelButton from "./DuelButton";
 import LeagueButton from "./LeagueButton";
+import DerbyButton from "./DerbyButton";
 import FlagPicker from "./FlagPicker";
 import FooterCredit from "./FooterCredit";
 import InspiredBy from "./InspiredBy";
@@ -184,6 +185,7 @@ export default function ResultView({
               canonicalCountry={canonicalCountry}
             />
             <DuelButton login={card.login} />
+            <DerbyButton login={card.login} />
             <LeagueButton login={card.login} />
           </div>
         </div>

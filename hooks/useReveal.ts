@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Finish } from "@/lib/scoring/types";
-import { type DuelPhase, type RevealPhase, duelSequenceFor, sequenceFor } from "@/lib/reveal";
+import {
+  type DuelPhase,
+  type DuelStep,
+  type RevealPhase,
+  derbySequenceFor,
+  duelSequenceFor,
+  sequenceFor,
+} from "@/lib/reveal";
 
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined" || !window.matchMedia) return false;
@@ -34,14 +41,17 @@ export function useReveal(finish: Finish): RevealPhase {
   return phase;
 }
 
-// Drives the Duel broadcast from the pure duel sequencer, plus a skip() that
+// Drives a head-to-head broadcast from a pure sequencer, plus a skip() that
 // jumps straight to "settled" (tap-to-skip) and cancels every pending step.
-export function useDuelReveal(): { phase: DuelPhase; skip: () => void } {
-  const [phase, setPhase] = useState<DuelPhase>(() => duelSequenceFor(false)[0]?.phase ?? { kind: "walkout" });
+function useMatchReveal(sequence: (reducedMotion: boolean) => DuelStep[]): {
+  phase: DuelPhase;
+  skip: () => void;
+} {
+  const [phase, setPhase] = useState<DuelPhase>(() => sequence(false)[0]?.phase ?? { kind: "walkout" });
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useIsomorphicLayoutEffect(() => {
-    const steps = duelSequenceFor(prefersReducedMotion());
+    const steps = sequence(prefersReducedMotion());
     // Same contract as useReveal: the first step lands before paint. On the
     // animated path that's "walkout" (already the initial state); under reduced
     // motion it's the lone "settled" step, so the broadcast is skipped whole —
@@ -49,6 +59,7 @@ export function useDuelReveal(): { phase: DuelPhase; skip: () => void } {
     setPhase(steps[0].phase);
     timers.current = steps.slice(1).map((s) => setTimeout(() => setPhase(s.phase), s.at));
     return () => timers.current.forEach(clearTimeout);
+    // The sequencers are module-level pure functions — stable by construction.
   }, []);
 
   const skip = useCallback(() => {
@@ -58,4 +69,13 @@ export function useDuelReveal(): { phase: DuelPhase; skip: () => void } {
   }, []);
 
   return { phase, skip };
+}
+
+export function useDuelReveal(): { phase: DuelPhase; skip: () => void } {
+  return useMatchReveal(duelSequenceFor);
+}
+
+// The Derby's own clock (slower — the ball has to travel), same phases.
+export function useDerbyReveal(): { phase: DuelPhase; skip: () => void } {
+  return useMatchReveal(derbySequenceFor);
 }
