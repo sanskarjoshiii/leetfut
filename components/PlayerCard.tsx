@@ -3,6 +3,7 @@
 import { memo, type CSSProperties } from "react";
 import type { Card, StatKey } from "@/lib/scoring/types";
 import { languageLogoUrl } from "@/lib/languages";
+import { SITE_HOST } from "@/lib/site";
 import { cardDisplayName } from "@/lib/text";
 import { resolveCardTheme } from "./finishTheme";
 
@@ -323,7 +324,7 @@ function PlayerCard({ card }: { card: Card }) {
             opacity: 0.62,
           }}
         >
-          LEETFUT.COM
+          {SITE_HOST.toUpperCase()}
         </div>
         <div
           style={{

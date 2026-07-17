@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import { SITE_URL } from "@/lib/site";
 
 // Umami Cloud (visitors + country/region breakdown, viewed on the Umami
 // dashboard). Only injected when a website ID is configured, so forks and local
@@ -52,7 +53,7 @@ const DESCRIPTION =
   "Rate any LeetCode profile out of 99 as a FIFA-Ultimate-Team-style player card, scored from real problems solved, contest rating and streaks. Get scouted and share your card.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://leetfut.com"),
+  metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
   keywords: [
@@ -69,7 +70,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: "https://leetfut.com",
+    url: SITE_URL,
     siteName: "LeetFut",
     type: "website",
   },

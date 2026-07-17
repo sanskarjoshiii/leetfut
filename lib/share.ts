@@ -1,12 +1,11 @@
 import type { Card } from "@/lib/scoring/types";
+import { SITE_URL } from "@/lib/site";
 
 // Share service — a pure module that, given a card, produces the share text and
 // per-platform intent URLs. No DOM, no side effects; the React layer wires the
 // gestures (native share sheet, window.open). Tested in isolation.
 
 export type SharePlatform = "x" | "linkedin" | "whatsapp";
-
-const SITE = "https://leetfut.com";
 
 // Deterministic line per login (FNV-1a) so a given user always gets the same
 // brag — leads with the flex, leaves room for the user's own comment.
@@ -32,7 +31,7 @@ const hash = (s: string): number => {
 // what the sharer saw (the page re-applies it; an absent/invalid code just
 // falls back to the LeetCode-derived default).
 export function cardUrl(card: Card): string {
-  const base = `${SITE}/${card.login}`;
+  const base = `${SITE_URL}/${card.login}`;
   return card.country ? `${base}?country=${encodeURIComponent(card.country)}` : base;
 }
 
@@ -97,7 +96,7 @@ export function shareUrl(card: Card): string {
 // Sharers who want to brag the score type it themselves.
 
 export function duelUrl(challenger: string, opponent: string): string {
-  return `${SITE}/${challenger}/vs/${opponent}`;
+  return `${SITE_URL}/${challenger}/vs/${opponent}`;
 }
 
 const duelLines = (opponent: string): string[] => [

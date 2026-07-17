@@ -2,6 +2,7 @@ import Background from "@/components/Background";
 import AppShell from "@/components/AppShell";
 import { getRepoStars } from "@/lib/repoStars";
 import { getScoutCount, getScoutHistory } from "@/lib/analytics";
+import { SITE_URL } from "@/lib/site";
 
 // ISR: the shell is served straight from the CDN and re-rendered at most once a
 // minute, so first paint never waits on a serverless cold start. The scout
@@ -14,15 +15,15 @@ const JSON_LD = {
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://leetfut.com/#website",
-      url: "https://leetfut.com",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
       name: "LeetFut",
       description: "Turn any LeetCode profile into a player card rated out of 99.",
     },
     {
       "@type": "WebApplication",
       name: "LeetFut",
-      url: "https://leetfut.com",
+      url: SITE_URL,
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Web",
       browserRequirements: "Requires JavaScript",
