@@ -3,6 +3,7 @@ import { scoutCard } from "@/lib/scout";
 import { pickFlag } from "@/lib/flagPriority";
 import { renderCardImage } from "@/lib/og/renderCard";
 import { loadCardFonts } from "@/lib/og/card";
+import { SITE_HOST } from "@/lib/site";
 
 export const runtime = "nodejs";
 
@@ -50,7 +51,7 @@ async function fallback(username: string) {
         <div style={{ display: "flex", color: "#ffa116", fontSize: 34, fontWeight: 700, letterSpacing: 6 }}>LEETFUT</div>
         <div style={{ display: "flex", fontSize: 56, fontWeight: 700, marginTop: 24 }}>@{username}</div>
         <div style={{ display: "flex", fontSize: 30, color: "#a8a29e", marginTop: 22 }}>scout this profile at</div>
-        <div style={{ display: "flex", marginTop: 10, fontSize: 32, color: "#ffa116", fontWeight: 700 }}>leetfut.com</div>
+        <div style={{ display: "flex", marginTop: 10, fontSize: 32, color: "#ffa116", fontWeight: 700 }}>{SITE_HOST}</div>
       </div>
     ),
     { width: W, height: H, fonts, headers: { "Cache-Control": "public, max-age=300" } },

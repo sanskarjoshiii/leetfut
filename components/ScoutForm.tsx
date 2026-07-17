@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import logo from "@/public/leetfutlogo.webp";
 
 interface Props {
   loading: boolean;
@@ -32,10 +34,14 @@ export default function ScoutForm({
     <div className="min-w-0 flex-1">
       {/* brand logo — the hero mark */}
       <div className="mb-2 max-[860px]:mx-auto max-[860px]:flex max-[860px]:justify-center">
-        <img
-          src="/leetfutlogo.png"
+        {/* priority: this is the home LCP candidate — preload it instead of
+            letting it queue behind the rest of the page. */}
+        <Image
+          src={logo}
           alt="LeetFut"
+          priority
           draggable={false}
+          sizes="(max-width: 860px) 196px, 23vw"
           className="h-auto w-[clamp(196px,23vw,281px)] select-none rounded-[16px]"
         />
       </div>

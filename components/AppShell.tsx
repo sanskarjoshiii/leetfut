@@ -9,7 +9,9 @@ import dynamic from "next/dynamic";
 import FooterCredit from "@/components/FooterCredit";
 import InspiredBy from "@/components/InspiredBy";
 import GithubStar from "@/components/GithubStar";
+import ScoutGraph from "@/components/ScoutGraph";
 import { SAMPLE_CARDS } from "@/lib/leetcode/samples";
+import type { ScoutHistoryPoint } from "@/lib/analytics";
 
 const HowItWorksModal = dynamic(() => import("@/components/HowItWorksModal"), {
   ssr: false,
@@ -21,9 +23,11 @@ const WhatsNew = dynamic(() => import("@/components/WhatsNew"), { ssr: false });
 export default function AppShell({
   stars,
   scoutCount,
+  scoutHistory,
 }: {
   stars: number | null;
   scoutCount: number | null;
+  scoutHistory: ScoutHistoryPoint[] | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -72,6 +76,9 @@ export default function AppShell({
           />
           <CardFan cards={SAMPLE_CARDS} onPick={handleScout} />
         </div>
+        {/* users-over-time sparkline — below the card fan, above the footer
+            credit / inspired-by badge. Renders nothing until history exists. */}
+        <ScoutGraph history={scoutHistory} />
         <footer className="relative z-[2] mt-auto flex flex-none items-center justify-center p-[clamp(12px,2.6vh,24px)]">
           <FooterCredit />
         </footer>

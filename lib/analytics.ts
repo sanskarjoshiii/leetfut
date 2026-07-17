@@ -12,9 +12,17 @@ import { redis } from "./redis";
 const TOTAL_KEY = "leetfut:scouts:total";
 const SEEN_KEY = "leetfut:scouts:seen";
 
+// Per-day counters of NEW distinct profiles, keyed by UTC date, feeding the home
+// sparkline. Buckets expire after 90 days (the graph shows 30) so the keyspace
+// stays bounded; the all-time total above is the durable number.
+const DAILY_PREFIX = "leetfut:scouts:daily:";
+const DAILY_TTL_SECONDS = 90 * 24 * 60 * 60;
+const dayKeyFor = (day: string) => `${DAILY_PREFIX}${day}`;
+const utcDay = (d: Date) => d.toISOString().slice(0, 10);
+
 // File fallback location (project root). Created lazily on first scout.
 const FILE = path.join(process.cwd(), ".data", "scouts.json");
-type Store = { total: number; seen: string[] };
+type Store = { total: number; seen: string[]; daily?: Record<string, number> };
 
 const normalize = (username: string) => username.trim().replace(/^@/, "").toLowerCase();
 
@@ -26,9 +34,13 @@ async function readStore(): Promise<Store> {
   try {
     const raw = await fs.readFile(FILE, "utf8");
     const s = JSON.parse(raw) as Partial<Store>;
-    return { total: Number(s.total) || 0, seen: Array.isArray(s.seen) ? s.seen : [] };
+    return {
+      total: Number(s.total) || 0,
+      seen: Array.isArray(s.seen) ? s.seen : [],
+      daily: s.daily && typeof s.daily === "object" ? s.daily : {},
+    };
   } catch {
-    return { total: 0, seen: [] };
+    return { total: 0, seen: [], daily: {} };
   }
 }
 
@@ -42,7 +54,15 @@ export async function recordScout(username: string): Promise<void> {
     try {
       // SADD returns 1 only when the member is new -> gate the counter on it.
       const added = await redis.sadd(SEEN_KEY, login);
-      if (added === 1) await redis.incr(TOTAL_KEY);
+      if (added === 1) {
+        const dayKey = dayKeyFor(utcDay(new Date()));
+        await redis
+          .multi()
+          .incr(TOTAL_KEY)
+          .incr(dayKey)
+          .expire(dayKey, DAILY_TTL_SECONDS)
+          .exec();
+      }
     } catch (e) {
       console.error("[analytics] recordScout failed:", (e as Error).message);
     }
@@ -56,6 +76,13 @@ export async function recordScout(username: string): Promise<void> {
       if (store.seen.includes(login)) return;
       store.seen.push(login);
       store.total += 1;
+      const today = utcDay(new Date());
+      const daily = store.daily ?? {};
+      daily[today] = (daily[today] || 0) + 1;
+      // Same 90-day retention as the Redis buckets, enforced on write.
+      const cutoff = utcDay(new Date(Date.now() - DAILY_TTL_SECONDS * 1000));
+      for (const day of Object.keys(daily)) if (day < cutoff) delete daily[day];
+      store.daily = daily;
       await fs.mkdir(path.dirname(FILE), { recursive: true });
       await fs.writeFile(FILE, JSON.stringify(store));
     } catch (e) {
@@ -82,4 +109,49 @@ export async function getScoutCount(): Promise<number | null> {
   } catch {
     return null;
   }
+}
+
+// One point per day for the home sparkline: the cumulative distinct-scout total
+// at the end of each of the last `days` UTC days, ending today. Reconstructed
+// backwards from the live total minus each day's new-scout bucket, so days from
+// before daily tracking existed flatten to the earliest known value instead of
+// dropping to zero. Null when the counter itself is unavailable.
+export type ScoutHistoryPoint = { day: string; total: number };
+
+export async function getScoutHistory(days = 30): Promise<ScoutHistoryPoint[] | null> {
+  const total = await getScoutCount();
+  if (total == null) return null;
+
+  const dayList: string[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    dayList.push(utcDay(new Date(Date.now() - i * 24 * 60 * 60 * 1000)));
+  }
+
+  let dailyNew: Record<string, number> = {};
+  if (redis) {
+    try {
+      const values = await redis.mget(dayList.map(dayKeyFor));
+      dayList.forEach((day, i) => {
+        dailyNew[day] = Number(values[i]) || 0;
+      });
+    } catch {
+      return null;
+    }
+  } else {
+    try {
+      dailyNew = (await readStore()).daily ?? {};
+    } catch {
+      return null;
+    }
+  }
+
+  // Walk backwards: today's end-of-day total is the live total; each earlier
+  // day's is that minus the newer day's new scouts. Clamp at 0 for safety.
+  const points: ScoutHistoryPoint[] = new Array(dayList.length);
+  let running = total;
+  for (let i = dayList.length - 1; i >= 0; i--) {
+    points[i] = { day: dayList[i], total: Math.max(0, running) };
+    running -= dailyNew[dayList[i]] || 0;
+  }
+  return points;
 }

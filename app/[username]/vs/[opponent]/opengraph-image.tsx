@@ -3,6 +3,7 @@ import { after } from "next/server";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { scoutCard } from "@/lib/scout";
+import { SITE_HOST } from "@/lib/site";
 import { pickFlag } from "@/lib/flagPriority";
 import { recordScout } from "@/lib/analytics";
 import { loadCardAssets, cardTree } from "@/lib/og/renderCard";
@@ -142,7 +143,7 @@ export default async function Image({
               marginTop: 10,
             }}
           >
-            leetfut.com
+            {SITE_HOST}
           </div>
         </div>
       ),

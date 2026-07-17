@@ -2,7 +2,14 @@ import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Inter, JetBrains_Mono, EB_Garamond } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import { SITE_URL } from "@/lib/site";
+
+// Umami Cloud (visitors + country/region breakdown, viewed on the Umami
+// dashboard). Only injected when a website ID is configured, so forks and local
+// dev send nothing.
+const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 
 // Display — ultra-condensed all-caps for the WC26 "tournament" impact.
 const display = Bebas_Neue({
@@ -46,7 +53,7 @@ const DESCRIPTION =
   "Rate any LeetCode profile out of 99 as a FIFA-Ultimate-Team-style player card, scored from real problems solved, contest rating and streaks. Get scouted and share your card.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://leetfut.com"),
+  metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
   keywords: [
@@ -63,7 +70,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: "https://leetfut.com",
+    url: SITE_URL,
     siteName: "LeetFut",
     type: "website",
   },
@@ -87,6 +94,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <Analytics />
+        {UMAMI_WEBSITE_ID && (
+          <Script
+            src="https://cloud.umami.is/script.js"
+            data-website-id={UMAMI_WEBSITE_ID}
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );

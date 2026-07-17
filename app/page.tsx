@@ -1,26 +1,29 @@
 import Background from "@/components/Background";
 import AppShell from "@/components/AppShell";
 import { getRepoStars } from "@/lib/repoStars";
-import { getScoutCount } from "@/lib/analytics";
+import { getScoutCount, getScoutHistory } from "@/lib/analytics";
+import { SITE_URL } from "@/lib/site";
 
-// Dynamic so the live scout count is fresh per load (the stars fetch keeps its
-// own 1h cache regardless).
-export const dynamic = "force-dynamic";
+// ISR: the shell is served straight from the CDN and re-rendered at most once a
+// minute, so first paint never waits on a serverless cold start. The scout
+// count/graph tolerate being up to 60s stale (the stars fetch keeps its own 1h
+// cache regardless).
+export const revalidate = 60;
 
 const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://leetfut.com/#website",
-      url: "https://leetfut.com",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
       name: "LeetFut",
       description: "Turn any LeetCode profile into a player card rated out of 99.",
     },
     {
       "@type": "WebApplication",
       name: "LeetFut",
-      url: "https://leetfut.com",
+      url: SITE_URL,
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Web",
       browserRequirements: "Requires JavaScript",
@@ -32,12 +35,16 @@ const JSON_LD = {
 };
 
 export default async function Home() {
-  const [stars, scoutCount] = await Promise.all([getRepoStars(), getScoutCount()]);
+  const [stars, scoutCount, scoutHistory] = await Promise.all([
+    getRepoStars(),
+    getScoutCount(),
+    getScoutHistory(),
+  ]);
   return (
     <div className="relative min-h-screen overflow-x-hidden text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
       <Background />
-      <AppShell stars={stars} scoutCount={scoutCount} />
+      <AppShell stars={stars} scoutCount={scoutCount} scoutHistory={scoutHistory} />
     </div>
   );
 }

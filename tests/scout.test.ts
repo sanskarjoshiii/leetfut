@@ -101,3 +101,63 @@ describe("scoutCard single-flight", () => {
     expect(fetchProfile).toHaveBeenCalledTimes(2);
   });
 });
+
+const CACHE_KEY = "leetfut:card:v2:torvalds";
+
+describe("scoutCard stale-while-revalidate", () => {
+  it("serves a stale card immediately and refreshes it in the background", async () => {
+    fetchProfile.mockResolvedValueOnce(payload("torvalds"));
+    await scoutCard("torvalds");
+
+    // Age the entry past its fresh window (still inside the hard TTL).
+    const entry = JSON.parse(store.get(CACHE_KEY)!);
+    entry.freshUntil = Date.now() - 1;
+    store.set(CACHE_KEY, JSON.stringify(entry));
+
+    fetchProfile.mockResolvedValueOnce({ ...payload("torvalds"), name: "refreshed" });
+    const served = await scoutCard("torvalds");
+    expect(served).toMatchObject({ login: "torvalds" }); // stale card, served instantly
+
+    await flush(); // let the background rebuild land
+    expect(fetchProfile).toHaveBeenCalledTimes(2);
+    const refreshed = JSON.parse(store.get(CACHE_KEY)!);
+    expect(refreshed.card).toMatchObject({ name: "refreshed" });
+    expect(refreshed.freshUntil).toBeGreaterThan(Date.now());
+
+    // Next scout gets the refreshed card from cache — no third fetch.
+    await expect(scoutCard("torvalds")).resolves.toMatchObject({ name: "refreshed" });
+    expect(fetchProfile).toHaveBeenCalledTimes(2);
+  });
+
+  it("coalesces a burst of stale hits into one background rebuild", async () => {
+    fetchProfile.mockResolvedValueOnce(payload("torvalds"));
+    await scoutCard("torvalds");
+    const entry = JSON.parse(store.get(CACHE_KEY)!);
+    entry.freshUntil = Date.now() - 1;
+    store.set(CACHE_KEY, JSON.stringify(entry));
+
+    const d = deferred<ReturnType<typeof payload>>();
+    fetchProfile.mockReturnValueOnce(d.promise);
+    await Promise.all([scoutCard("torvalds"), scoutCard("torvalds"), scoutCard("torvalds")]);
+    expect(fetchProfile).toHaveBeenCalledTimes(2); // initial + ONE revalidate
+    d.resolve(payload("torvalds"));
+    await flush();
+  });
+});
+
+describe("scoutCard negative caching", () => {
+  it("remembers notfound so an immediate retry skips the fetch", async () => {
+    fetchProfile.mockRejectedValueOnce({ type: "notfound", message: "no such user" });
+    await expect(scoutCard("ghost")).rejects.toMatchObject({ type: "notfound" });
+    await expect(scoutCard("ghost")).rejects.toMatchObject({ type: "notfound" });
+    expect(fetchProfile).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not negative-cache transient failures", async () => {
+    fetchProfile.mockRejectedValueOnce({ type: "network", message: "boom" });
+    await expect(scoutCard("torvalds")).rejects.toMatchObject({ type: "network" });
+    fetchProfile.mockResolvedValueOnce(payload("torvalds"));
+    await expect(scoutCard("torvalds")).resolves.toMatchObject({ login: "torvalds" });
+    expect(fetchProfile).toHaveBeenCalledTimes(2);
+  });
+});

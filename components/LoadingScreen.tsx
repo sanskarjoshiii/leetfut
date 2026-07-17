@@ -16,7 +16,7 @@ export default function LoadingScreen({ login }: { login?: string }) {
   return (
     <main className="relative z-[2] flex h-[100dvh] flex-col items-center justify-center px-6 text-center">
       <img
-        src="/leetfutlogo.png"
+        src="/leetfutlogo.webp"
         alt="LeetFut"
         draggable={false}
         className="animate-float h-auto w-[clamp(240px,42vw,320px)] select-none rounded-[18px]"
