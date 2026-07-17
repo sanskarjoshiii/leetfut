@@ -10,7 +10,6 @@ import TiltCard from "./TiltCard";
 import VsBurst from "./VsBurst";
 import FooterCredit from "./FooterCredit";
 import GithubStar from "./GithubStar";
-import InspiredBy from "./InspiredBy";
 import { XLogo } from "./BrandIcons";
 import { duelThemes, resolveCardTheme, rgba } from "./finishTheme";
 import { useDuelReveal } from "@/hooks/useReveal";
@@ -674,7 +673,6 @@ export default function DuelView({
         </footer>
       </main>
 
-      <InspiredBy />
     </>
   );
 }

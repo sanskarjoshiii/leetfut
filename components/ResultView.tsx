@@ -11,7 +11,6 @@ import LeagueButton from "./LeagueButton";
 import DerbyButton from "./DerbyButton";
 import FlagPicker from "./FlagPicker";
 import FooterCredit from "./FooterCredit";
-import InspiredBy from "./InspiredBy";
 import GithubStar from "./GithubStar";
 import dynamic from "next/dynamic";
 import { AttributesPanel, MetricsPanel, ReportHeader } from "./ScoutReport";
@@ -224,7 +223,6 @@ export default function ResultView({
       </div>
     </main>
 
-    <InspiredBy />
 
     {modalOpen && <HowItWorksModal onClose={() => setModalOpen(false)} />}
     </>

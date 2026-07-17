@@ -6,7 +6,6 @@ import { ArrowLeft } from "lucide-react";
 import type { Card } from "@/lib/scoring/types";
 import Background from "./Background";
 import FooterCredit from "./FooterCredit";
-import InspiredBy from "./InspiredBy";
 
 // The League standings — you + your crew, each scouted live, sorted into a table
 // with a 1st/2nd/3rd podium. Cards are fetched client-side from the same card API
@@ -250,7 +249,6 @@ export default function LeagueView({ players }: { players: string[] }) {
           <FooterCredit />
         </footer>
       </main>
-      <InspiredBy />
     </div>
   );
 }

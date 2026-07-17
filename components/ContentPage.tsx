@@ -3,7 +3,6 @@ import { ArrowLeft } from "lucide-react";
 import Background from "./Background";
 import FooterCredit from "./FooterCredit";
 import FooterLinks from "./FooterLinks";
-import InspiredBy from "./InspiredBy";
 
 // Shared shell for the static content pages (About / FAQ / Privacy / Terms /
 // Contact) — same charcoal + stadium theme as the app, a centered prose column,
@@ -24,7 +23,7 @@ export default function ContentPage({
       <Background />
       <main className="relative z-[2] mx-auto flex min-h-screen w-full max-w-[760px] flex-col px-[clamp(18px,4vw,28px)] py-[clamp(18px,3vh,28px)]">
         {/* top bar */}
-        <div className="mb-[clamp(24px,5vh,44px)] flex items-center justify-between gap-3">
+        <div className="mb-[16px] flex items-center justify-between gap-3">
           <Link
             href="/"
             className="group inline-flex items-center gap-[6px] text-[13px] font-medium tracking-wide text-ink-faint transition hover:text-ink"
@@ -36,6 +35,11 @@ export default function ContentPage({
             <img src="/leetfutlogo.png" alt="LeetFut" draggable={false} className="h-[34px] w-auto select-none rounded-[8px]" />
           </Link>
         </div>
+
+        {/* top nav — moved up from the footer */}
+        <nav className="mb-[clamp(22px,4vh,36px)] flex justify-center">
+          <FooterLinks />
+        </nav>
 
         {/* header */}
         <header className="mb-[clamp(22px,4vh,36px)]">
@@ -51,11 +55,9 @@ export default function ContentPage({
 
         {/* footer */}
         <footer className="relative z-[2] mt-[clamp(34px,6vh,64px)] flex flex-col items-center gap-[14px] border-t border-line pt-[clamp(18px,3vh,26px)]">
-          <FooterLinks />
           <FooterCredit />
         </footer>
       </main>
-      <InspiredBy />
     </div>
   );
 }

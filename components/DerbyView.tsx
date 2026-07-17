@@ -14,7 +14,6 @@ import {
 } from "@/lib/derby";
 import DerbyPitch from "./DerbyPitch";
 import FooterCredit from "./FooterCredit";
-import InspiredBy from "./InspiredBy";
 import { XLogo } from "./BrandIcons";
 import { derbyKits, rgba, type ResultTheme } from "./finishTheme";
 import { useDerbyReveal } from "@/hooks/useReveal";
@@ -669,7 +668,6 @@ export default function DerbyView({ home, away }: { home: string[]; away: string
           )}
         </>
       )}
-      <InspiredBy />
     </div>
   );
 }
