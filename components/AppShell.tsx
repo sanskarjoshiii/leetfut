@@ -67,9 +67,9 @@ export default function AppShell({
         <div className="absolute right-[clamp(20px,5vw,52px)] top-[clamp(16px,3vh,26px)] z-[3]">
           <GithubStar stars={stars} />
         </div>
-        {/* page nav, overlaid top-left to mirror the GitHub star — never pushes
-            the vertically-centered hero down. */}
-        <div className="absolute left-[clamp(20px,5vw,52px)] top-[clamp(16px,3vh,26px)] z-[3] max-w-[calc(100%-140px)]">
+        {/* page nav, overlaid top-center — never pushes the vertically-centered
+            hero down. */}
+        <div className="absolute left-1/2 top-[clamp(16px,3vh,26px)] z-[3] -translate-x-1/2">
           <FooterLinks />
         </div>
         <div className="mx-auto flex w-full max-w-[1180px] flex-1 items-center gap-[clamp(24px,5vw,72px)] px-[clamp(22px,5vw,56px)] max-[860px]:flex-col max-[860px]:gap-[34px] max-[860px]:pb-6 max-[860px]:pt-[clamp(40px,6vh,56px)] max-[860px]:text-center">
