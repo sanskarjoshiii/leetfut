@@ -134,6 +134,53 @@ export function duelThemes(challenger: Card, opponent: Card): { home: ResultThem
   return { home, away };
 }
 
+// ---- Derby kit clash: a real away strip ----
+// The Duel could tolerate gold-vs-gold (two cards, two fixed corners, a dot cue
+// per row). A Derby cannot: two SQUADS whose captains are both gold would put
+// six identically-inked players on one pitch, and nothing on screen would say
+// which shirt is which. So the derby does what football does — when the kits
+// clash, the AWAY side changes into a strip that clashes with nothing. Home
+// always keeps its tier colors; only the visitor changes, as in the real game.
+const CHANGE_KIT: ResultTheme = {
+  ink: "#5ad1e5",
+  glow: "rgba(90,209,229,.42)",
+  chip: "#0c2b31",
+};
+
+// Straight RGB distance. Crude as color science, exactly right here: we only
+// need "could a viewer mistake these two shirts", and the tier inks are few and
+// far apart enough that the honest cases (gold≈icon at 15, silver≈toty at 28,
+// bronze≈gold at 53) all fall under the gate while true contrasts clear it.
+const KIT_CLASH_GATE = 60;
+
+export function kitDistance(a: string, b: string): number {
+  const rgb = (hex: string) => {
+    const h = hex.replace("#", "");
+    const f = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+    const n = parseInt(f, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const [r1, g1, b1] = rgb(a);
+  const [r2, g2, b2] = rgb(b);
+  return Math.hypot(r1 - r2, g1 - g2, b1 - b2);
+}
+
+export function kitsClash(a: string, b: string): boolean {
+  return kitDistance(a, b) < KIT_CLASH_GATE;
+}
+
+// Kits for a derby, chosen from each side's CAPTAIN (the squad's best card sets
+// the club's colors).
+export function derbyKits(
+  homeCaptain: Card,
+  awayCaptain: Card,
+): { home: ResultTheme; away: ResultTheme; changed: boolean } {
+  const home = resolveResultTheme(homeCaptain);
+  const away = resolveResultTheme(awayCaptain);
+  if (!kitsClash(home.ink, away.ink)) return { home, away, changed: false };
+  return { home, away: CHANGE_KIT, changed: true };
+}
+
 // Confetti palette per tier — gold for prestige, green always woven in (brand).
 // Founders burst in their own accent. Consumed by the card reveal (the Duel
 // deliberately keeps its full time clean — no confetti).

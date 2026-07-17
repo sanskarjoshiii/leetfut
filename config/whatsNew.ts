@@ -18,6 +18,12 @@ export type WhatsNewItem = {
 // ─────────────────────────────────────────────────────────────────────────
 export const WHATS_NEW: WhatsNewItem[] = [
   {
+    id: "derby",
+    title: "THE DERBY",
+    body: "3-a-side. Pick two who play alongside you, name the three you're up against, and watch it out on the pitch — six stats, six chances, one scoreline. The cyan DERBY plate is on your card page.",
+    show: true,
+  },
+  {
     id: "duels",
     title: "DUEL A RIVAL",
     body: "Take your card head-to-head against any solver. Six stats, one winner. The gold VS plate is on your card page.",

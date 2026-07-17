@@ -52,6 +52,7 @@
   --animate-pop: pop 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-flag-raise: flag-raise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-league-glow: league-glow 2.6s ease-in-out infinite;
+  --animate-derby-glow: derby-glow 2.6s ease-in-out infinite;
 }
 
 /* the League CTA's breathing amber halo — the "glow among all" the entry wears */
@@ -334,6 +335,164 @@
   50% {
     transform: scale(1.7);
     opacity: 0.6;
+  }
+}
+
+/* ---- THE DERBY ---- */
+/* the scorer's jump — a player leaving the turf as it goes in. Declared TWICE,
+   identically: a player scoring back-to-back keeps the same animation string,
+   and only a change of NAME makes the browser replay it (see DerbyPitch). */
+@keyframes derby-celebrate-a {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-9px) scale(1.16);
+  }
+  70% {
+    transform: translateY(-2px) scale(1.04);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes derby-celebrate-b {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-9px) scale(1.16);
+  }
+  70% {
+    transform: translateY(-2px) scale(1.04);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* the strike: centre spot → the net → walked back for the restart. The round
+   trip finishes well inside one row gap (see ATTACK_MS in DerbyPitch), so the
+   ball is home and still for a beat before the next attack begins. */
+@keyframes derby-strike-right {
+  0% {
+    left: 50%;
+  }
+  42% {
+    left: 95%;
+  }
+  66% {
+    left: 95%;
+  }
+  100% {
+    left: 50%;
+  }
+}
+@keyframes derby-strike-left {
+  0% {
+    left: 50%;
+  }
+  42% {
+    left: 5%;
+  }
+  66% {
+    left: 5%;
+  }
+  100% {
+    left: 50%;
+  }
+}
+
+/* the break: players leave the middle to chase the attack, hold while the ball
+   is at the net, then walk back and re-form on the centre line. Deliberately on
+   the strike's own clock and beats (42%/66%) so the pitch and the ball travel
+   and settle as one. --dx/--dy come from the player (see jostleFor); declared
+   twice for the same replay reason as derby-celebrate. */
+@keyframes derby-jostle-a {
+  0% {
+    transform: translate(0, 0);
+  }
+  42% {
+    transform: translate(var(--dx, 0), var(--dy, 0));
+  }
+  66% {
+    transform: translate(var(--dx, 0), var(--dy, 0));
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes derby-jostle-b {
+  0% {
+    transform: translate(0, 0);
+  }
+  42% {
+    transform: translate(var(--dx, 0), var(--dy, 0));
+  }
+  66% {
+    transform: translate(var(--dx, 0), var(--dy, 0));
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* the net rippling as it goes in */
+@keyframes derby-net-flash {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* the ring that blows out of the scorer as the net ripples */
+@keyframes derby-shockwave {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* the GOAL! shout — punches in, hangs, fades off the pitch */
+@keyframes derby-goal-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  55% {
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* the Derby CTA's breathing halo — a cooler twin of the League's amber pulse,
+   so the two prestige entries read as siblings, not duplicates */
+@keyframes derby-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(90, 209, 229, 0.3), 0 8px 26px -10px rgba(90, 209, 229, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(90, 209, 229, 0.55), 0 12px 34px -6px rgba(90, 209, 229, 0.7);
   }
 }
 

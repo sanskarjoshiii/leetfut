@@ -71,27 +71,50 @@ export interface DuelStep {
 }
 
 const DUEL_ROWS = 6;
-const DUEL_FIRST_ROW_AT = 1500; // after both walkouts land
-const DUEL_ROW_GAP = 480;
-const DUEL_RESULT_GAP = 700; // beat between the last row and the FT stamp
-const DUEL_SETTLE_GAP = 900;
 
-export function duelSequenceFor(reducedMotion: boolean): DuelStep[] {
+interface MatchTiming {
+  firstRowAt: number; // when the first row resolves (after the entrance lands)
+  rowGap: number;
+  resultGap: number; // beat between the last row and the full-time stamp
+  settleGap: number;
+}
+
+// The broadcast machine both head-to-heads run on: enter, resolve the six rows
+// in order, stamp full time, settle. The Duel and the Derby differ only in
+// pacing, so they share the shape and bring their own clock.
+function matchSequence(t: MatchTiming, reducedMotion: boolean): DuelStep[] {
   if (reducedMotion) return [{ phase: { kind: "settled" }, at: 0 }];
   const steps: DuelStep[] = [{ phase: { kind: "walkout" }, at: 0 }];
   for (let row = 0; row < DUEL_ROWS; row++) {
     steps.push({
       phase: { kind: "row", row },
-      at: DUEL_FIRST_ROW_AT + row * DUEL_ROW_GAP,
+      at: t.firstRowAt + row * t.rowGap,
     });
   }
-  const lastRowAt = DUEL_FIRST_ROW_AT + (DUEL_ROWS - 1) * DUEL_ROW_GAP;
-  steps.push({ phase: { kind: "result" }, at: lastRowAt + DUEL_RESULT_GAP });
+  const lastRowAt = t.firstRowAt + (DUEL_ROWS - 1) * t.rowGap;
+  steps.push({ phase: { kind: "result" }, at: lastRowAt + t.resultGap });
   steps.push({
     phase: { kind: "settled" },
-    at: lastRowAt + DUEL_RESULT_GAP + DUEL_SETTLE_GAP,
+    at: lastRowAt + t.resultGap + t.settleGap,
   });
   return steps;
+}
+
+export function duelSequenceFor(reducedMotion: boolean): DuelStep[] {
+  return matchSequence(
+    { firstRowAt: 1500, rowGap: 480, resultGap: 700, settleGap: 900 },
+    reducedMotion,
+  );
+}
+
+// The Derby runs slower than the Duel on purpose: each row is an attack the ball
+// has to physically travel for (see DerbyPitch), so the gap is the ball's flight
+// plus a beat to read the goal. Rushing it turns the pitch into a flicker.
+export function derbySequenceFor(reducedMotion: boolean): DuelStep[] {
+  return matchSequence(
+    { firstRowAt: 1900, rowGap: 950, resultGap: 800, settleGap: 900 },
+    reducedMotion,
+  );
 }
 
 // How many stat rows are resolved (0–6) in a given phase — the scoreboard and

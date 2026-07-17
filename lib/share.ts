@@ -125,3 +125,37 @@ export function duelSharePayload(
     url: duelUrl(challenger, opponent),
   };
 }
+
+// ---- Derby sharing ----
+// Same rule as the Duel: score-free, because the pitch is the payoff.
+
+export function derbyUrl(home: string[], away: string[]): string {
+  return `${SITE_URL}/derby?home=${encodeURIComponent(home.join(","))}&away=${encodeURIComponent(away.join(","))}`;
+}
+
+const derbyLines = (): string[] => [
+  `picked my 3 and took them to a derby. full time inside.`,
+  `three of us, three of them, six stats, one pitch. result inside.`,
+  `assembled a squad and put it on the grass. someone's getting subbed.`,
+  `3-a-side on leetcode stats. the scoreline does the talking.`,
+];
+
+export function derbyShareMessage(home: string[], away: string[]): string {
+  const pool = derbyLines();
+  return `${pool[hash(`${home.join(",")}/${away.join(",")}`) % pool.length]}\n\nwatch the derby →`;
+}
+
+export function derbyIntentUrl(home: string[], away: string[]): string {
+  return tweetIntent(derbyShareMessage(home, away), derbyUrl(home, away));
+}
+
+export function derbySharePayload(
+  home: string[],
+  away: string[],
+): { title: string; text: string; url: string } {
+  return {
+    title: "LeetFut Derby",
+    text: derbyShareMessage(home, away),
+    url: derbyUrl(home, away),
+  };
+}
