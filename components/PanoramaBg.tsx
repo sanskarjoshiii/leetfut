@@ -47,9 +47,13 @@ export default function PanoramaBg() {
   return (
     <img
       ref={ref}
-      src="/img_bg.jpg"
+      src="/img_bg.webp"
       alt=""
       aria-hidden
+      // The backdrop paints the whole viewport, so fetch it at high priority
+      // rather than default (low, as a non-LCP-looking decorative image).
+      fetchPriority="high"
+      decoding="async"
       draggable={false}
       className="absolute inset-0 h-full w-full object-cover"
       style={{

@@ -3,9 +3,11 @@ import AppShell from "@/components/AppShell";
 import { getRepoStars } from "@/lib/repoStars";
 import { getScoutCount, getScoutHistory } from "@/lib/analytics";
 
-// Dynamic so the live scout count is fresh per load (the stars fetch keeps its
-// own 1h cache regardless).
-export const dynamic = "force-dynamic";
+// ISR: the shell is served straight from the CDN and re-rendered at most once a
+// minute, so first paint never waits on a serverless cold start. The scout
+// count/graph tolerate being up to 60s stale (the stars fetch keeps its own 1h
+// cache regardless).
+export const revalidate = 60;
 
 const JSON_LD = {
   "@context": "https://schema.org",

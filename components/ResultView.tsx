@@ -115,7 +115,7 @@ export default function ResultView({
             )}
           </button>
           <img
-            src="/leetfutlogo.png"
+            src="/leetfutlogo.webp"
             alt="LeetFut"
             draggable={false}
             className="h-[38px] w-auto select-none rounded-[8px]"

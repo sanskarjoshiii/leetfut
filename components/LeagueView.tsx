@@ -109,7 +109,7 @@ export default function LeagueView({ players }: { players: string[] }) {
             <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
             LEETFUT
           </Link>
-          <img src="/leetfutlogo.png" alt="LeetFut" draggable={false} className="h-[34px] w-auto select-none rounded-[8px]" />
+          <img src="/leetfutlogo.webp" alt="LeetFut" draggable={false} className="h-[34px] w-auto select-none rounded-[8px]" />
         </div>
 
         {/* title */}
