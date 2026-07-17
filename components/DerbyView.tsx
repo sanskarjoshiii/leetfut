@@ -221,7 +221,7 @@ function Broadcast({ derby, homeLogins, awayLogins }: { derby: Derby; homeLogins
           LEETFUT
         </Link>
         <img
-          src="/leetfutlogo.png"
+          src="/leetfutlogo.webp"
           alt="LeetFut"
           draggable={false}
           className="h-[34px] w-auto select-none rounded-[8px]"

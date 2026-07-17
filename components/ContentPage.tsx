@@ -32,7 +32,7 @@ export default function ContentPage({
             HOME
           </Link>
           <Link href="/" aria-label="LeetFut home">
-            <img src="/leetfutlogo.png" alt="LeetFut" draggable={false} className="h-[34px] w-auto select-none rounded-[8px]" />
+            <img src="/leetfutlogo.webp" alt="LeetFut" draggable={false} className="h-[34px] w-auto select-none rounded-[8px]" />
           </Link>
         </div>
 

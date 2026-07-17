@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/leetfutlogo.png" width="360" alt="LeetFut">
+<img src="public/leetfutlogo.webp" width="360" alt="LeetFut">
 
 # LeetFut
 
