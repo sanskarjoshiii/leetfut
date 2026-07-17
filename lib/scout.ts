@@ -29,8 +29,24 @@ const CARD_TTL_SECONDS = 120 * 60; // 2h — LeetCode stats move slowly; longer 
 const normalizeLogin = (username: string) => username.trim().replace(/^@/, "").toLowerCase();
 const keyFor = (login: string) => `leetfut:card:${CACHE_VERSION}:${login}`;
 
+// In-process fallback cache, used when there's no REDIS_URL. A scout costs a
+// handful of upstream calls, so without this every repeat view (the page, its OG
+// image, a duel corner, a league row) refetches the same profile. pm2 runs a
+// single instance, so this is a real cross-request cache — not a per-request
+// no-op. Bounded so a long-lived process can't grow unbounded.
+const MEM_MAX = 500;
+const mem = new Map<string, { card: Card; exp: number }>();
+
 async function readCache(login: string): Promise<Card | null> {
-  if (!redis) return null;
+  if (!redis) {
+    const hit = mem.get(login);
+    if (!hit) return null;
+    if (hit.exp <= Date.now()) {
+      mem.delete(login);
+      return null;
+    }
+    return hit.card;
+  }
   try {
     const raw = await redis.get(keyFor(login));
     return raw ? (JSON.parse(raw) as Card) : null;
@@ -41,7 +57,15 @@ async function readCache(login: string): Promise<Card | null> {
 }
 
 async function writeCache(login: string, card: Card): Promise<void> {
-  if (!redis) return;
+  if (!redis) {
+    // Evict the oldest entry once full (Map preserves insertion order).
+    if (mem.size >= MEM_MAX) {
+      const oldest = mem.keys().next().value;
+      if (oldest !== undefined) mem.delete(oldest);
+    }
+    mem.set(login, { card, exp: Date.now() + CARD_TTL_SECONDS * 1000 });
+    return;
+  }
   try {
     await redis.set(keyFor(login), JSON.stringify(card), "EX", CARD_TTL_SECONDS);
   } catch (e) {
