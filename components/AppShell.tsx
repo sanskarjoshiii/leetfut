@@ -8,6 +8,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import dynamic from "next/dynamic";
 import FooterCredit from "@/components/FooterCredit";
 import FooterLinks from "@/components/FooterLinks";
+import MobileNav from "@/components/MobileNav";
 import InspiredBy from "@/components/InspiredBy";
 import GithubStar from "@/components/GithubStar";
 import ScoutGraph from "@/components/ScoutGraph";
@@ -68,10 +69,11 @@ export default function AppShell({
           <GithubStar stars={stars} />
         </div>
         {/* page nav, overlaid top-center — never pushes the vertically-centered
-            hero down. */}
-        <div className="absolute left-1/2 top-[clamp(16px,3vh,26px)] z-[3] -translate-x-1/2">
+            hero down. Desktop only; a hamburger drawer takes over below 700px. */}
+        <div className="absolute left-1/2 top-[clamp(16px,3vh,26px)] z-[3] hidden -translate-x-1/2 min-[700px]:block">
           <FooterLinks />
         </div>
+        <MobileNav />
         <div className="mx-auto flex w-full max-w-[1180px] flex-1 items-center gap-[clamp(24px,5vw,72px)] px-[clamp(22px,5vw,56px)] max-[860px]:flex-col max-[860px]:gap-[34px] max-[860px]:pb-6 max-[860px]:pt-[clamp(40px,6vh,56px)] max-[860px]:text-center">
           <ScoutForm
             loading={isPending}

@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import Background from "./Background";
 import FooterCredit from "./FooterCredit";
 import FooterLinks from "./FooterLinks";
+import MobileNav from "./MobileNav";
 
 // Shared shell for the static content pages (About / FAQ / Privacy / Terms /
 // Contact) — same charcoal + stadium theme as the app, a centered prose column,
@@ -23,10 +24,10 @@ export default function ContentPage({
       <Background />
       <main className="relative z-[2] mx-auto flex min-h-screen w-full max-w-[760px] flex-col px-[clamp(18px,4vw,28px)] py-[clamp(18px,3vh,28px)]">
         {/* top bar */}
-        <div className="mb-[16px] flex items-center justify-between gap-3">
+        <div className="mb-[16px] flex items-center justify-between gap-3 max-[699px]:justify-end">
           <Link
             href="/"
-            className="group inline-flex items-center gap-[6px] text-[13px] font-medium tracking-wide text-ink-faint transition hover:text-ink"
+            className="group hidden items-center gap-[6px] text-[13px] font-medium tracking-wide text-ink-faint transition hover:text-ink min-[700px]:inline-flex"
           >
             <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
             HOME
@@ -36,10 +37,11 @@ export default function ContentPage({
           </Link>
         </div>
 
-        {/* top nav — moved up from the footer */}
-        <nav className="mb-[clamp(22px,4vh,36px)] flex justify-center">
+        {/* top nav — desktop only; a hamburger drawer takes over below 700px */}
+        <nav className="mb-[clamp(22px,4vh,36px)] hidden justify-center min-[700px]:flex">
           <FooterLinks />
         </nav>
+        <MobileNav />
 
         {/* header */}
         <header className="mb-[clamp(22px,4vh,36px)]">

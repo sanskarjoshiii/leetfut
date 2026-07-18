@@ -610,3 +610,17 @@
   border-radius: 5px;
   font-size: 13.5px;
 }
+
+/* Scout sparkline: pin to the bottom-left corner only when there's clearly room
+   (wide AND tall). On shorter/smaller viewports it stays in normal flow so it
+   can never overlap the hero's bottom content. */
+@media (min-width: 1100px) and (min-height: 820px) {
+  .scout-graph-corner {
+    position: fixed;
+    bottom: clamp(14px, 3vh, 22px);
+    left: clamp(14px, 3vw, 22px);
+    z-index: 40;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

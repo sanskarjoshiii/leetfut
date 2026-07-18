@@ -58,7 +58,7 @@ export default function ScoutGraph({ history }: { history: ScoutHistoryPoint[] |
     // Mirrors InspiredBy's placement rules on the opposite corner: fixed
     // bottom-LEFT from 700px up; below that it stays in normal flow (centered
     // under the cards) so it never floats over tappable full-width content.
-    <div className="relative z-[2] mx-auto flex w-fit max-w-full flex-col items-center gap-[8px] px-[26px] pb-[13px] pt-[14px] min-[700px]:fixed min-[700px]:bottom-[clamp(14px,3vh,22px)] min-[700px]:left-[clamp(14px,3vw,22px)] min-[700px]:z-40 min-[700px]:mx-0">
+    <div className="scout-graph-corner relative z-[2] mx-auto flex w-fit max-w-full flex-col items-center gap-[8px] px-[26px] pb-[13px] pt-[14px]">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="h-[44px] w-[min(260px,72vw)]"
