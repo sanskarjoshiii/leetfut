@@ -21,6 +21,7 @@ import { useShareActions } from "@/hooks/useShareActions";
 import { resolvedRows } from "@/lib/reveal";
 import { formatCount } from "@/lib/format";
 import { derbyIntentUrl, derbySharePayload, derbyUrl } from "@/lib/share";
+import { SITE_URL } from "@/lib/site";
 
 // THE DERBY — 3-a-side. Two squads, one pitch, the six stats as the six chances.
 // The data half of this file mirrors The League (client-side scout of N logins);
@@ -549,7 +550,7 @@ function Broadcast({ derby, homeLogins, awayLogins }: { derby: Derby; homeLogins
               <span className="max-[360px]:hidden">{linkCopied ? "Copied" : "Copy link"}</span>
             </button>
             <Link
-              href={derbyUrl(awayLogins, homeLogins).replace("https://leetfut.com", "")}
+              href={derbyUrl(awayLogins, homeLogins).replace(SITE_URL, "")}
               title="Rematch with the squads swapped"
               aria-label="Rematch with the squads swapped"
               className="group flex items-center justify-center gap-[7px] rounded-xl border border-line bg-white/[0.03] py-[11px] text-[12.5px] font-semibold text-ink-soft transition-all duration-200 ease-out hover:-translate-y-[1px] hover:border-white/25 hover:bg-white/[0.07] hover:text-white active:translate-y-0 active:scale-[.98]"

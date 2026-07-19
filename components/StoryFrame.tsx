@@ -4,6 +4,7 @@ import { forwardRef, type CSSProperties } from "react";
 import type { Card } from "@/lib/scoring/types";
 import PlayerCard from "./PlayerCard";
 import { resolveCardTheme, resolveResultTheme } from "./finishTheme";
+import { SITE_HOST } from "@/lib/site";
 
 // Instagram Story canvas (9:16). The frame renders at native resolution: the
 // captured PNG IS these pixels, so the on-page card's pixelRatio:3 upscale is
@@ -228,7 +229,7 @@ const StoryFrame = forwardRef<HTMLDivElement, { card: Card }>(function StoryFram
             whiteSpace: "nowrap",
           }}
         >
-          TRY YOUR CARD ON LEETFUT.COM
+          TRY YOUR CARD ON {SITE_HOST.toUpperCase()}
           <span style={{ fontSize: 48 }}>→</span>
         </div>
       </div>
