@@ -32,7 +32,7 @@ import type { Card } from "./scoring/types";
 // once (bump it) instead of serving stale-shaped cards until their TTL lapses.
 // v2: value went from a bare Card to the { card, freshUntil } / { neg } envelope.
 const CACHE_VERSION = "v2";
-const FRESH_SECONDS = 120 * 60; // 2h — LeetCode stats move slowly; longer freshness = fewer refetches of hot profiles under load.
+const FRESH_SECONDS = 60; // 1min — short so a scout reflects fresh solves quickly. Freshness only affects repeat scouts of the SAME profile (a viral burst of DIFFERENT profiles is misses either way, coalesced by `inflight`), so this stays cheap: at most one refetch per profile per minute.
 const HARD_TTL_SECONDS = 24 * 60 * 60; // stale-but-servable window; after this a viewer waits on a live fetch again.
 const NEG_TTL_SECONDS = 5 * 60; // notfound memory — long enough to absorb retry bursts, short enough to notice a new account.
 

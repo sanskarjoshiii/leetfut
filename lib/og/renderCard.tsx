@@ -5,6 +5,7 @@ import type { Card, StatKey } from "@/lib/scoring/types";
 import { resolveCardTheme } from "@/components/finishTheme";
 import { languageLogoUrl } from "@/lib/languages";
 import { cardDisplayName } from "@/lib/text";
+import { SITE_HOST } from "@/lib/site";
 import { loadCardFonts } from "./card";
 
 // Server-side re-creation of the in-app PlayerCard (components/PlayerCard.tsx),
@@ -199,7 +200,7 @@ export function cardTree(card: Card, assets: CardAssets, w: number) {
 
       {/* signature — branding baked into every shared/embedded card */}
       <div style={{ ...at(8, 94.6), display: "flex", fontSize: cqw(4.1), fontWeight: 700, letterSpacing: cqw(0.4), color: ink, opacity: 0.62 }}>
-        LEETFUT.COM
+        {SITE_HOST.toUpperCase()}
       </div>
       <div style={{ position: "absolute", right: "8%", top: "94.6%", display: "flex", fontSize: cqw(4.1), fontWeight: 700, letterSpacing: cqw(0.4), color: ink, opacity: 0.62 }}>
         @{card.login}
@@ -215,6 +216,6 @@ export async function renderCardImage(card: Card): Promise<ImageResponse> {
     width: EMBED_W,
     height: cardH(EMBED_W),
     fonts: assets.fonts,
-    headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800" },
+    headers: { "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=86400" },
   });
 }
