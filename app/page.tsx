@@ -1,7 +1,7 @@
 import Background from "@/components/Background";
 import AppShell from "@/components/AppShell";
 import { getRepoStars } from "@/lib/repoStars";
-import { getScoutCount, getScoutHistory } from "@/lib/analytics";
+import { getScoutCount, getVisitorHistory } from "@/lib/analytics";
 import { SITE_URL } from "@/lib/site";
 
 // ISR: the shell is served straight from the CDN and re-rendered at most once a
@@ -35,10 +35,12 @@ const JSON_LD = {
 };
 
 export default async function Home() {
+  // scoutCount -> "cards rated" (distinct profiles); visitor history -> the
+  // "users scouted" sparkline (unique browsers). Both refresh live client-side.
   const [stars, scoutCount, scoutHistory] = await Promise.all([
     getRepoStars(),
     getScoutCount(),
-    getScoutHistory(),
+    getVisitorHistory(),
   ]);
   return (
     <div className="relative min-h-screen overflow-x-hidden text-ink">

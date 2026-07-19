@@ -36,6 +36,57 @@ export default function AppShell({
   const [pending, setPending] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  // Live home stats — seeded from the server props, then kept fresh client-side
+  // so "cards rated" and "users scouted" tick up in runtime without a refresh.
+  const [cards, setCards] = useState<number | null>(scoutCount);
+  const [history, setHistory] = useState<ScoutHistoryPoint[] | null>(scoutHistory);
+
+  // Register this browser as a unique visitor (counted ONCE, ever — repeat opens
+  // or many cards don't re-count it) and poll for live numbers.
+  useEffect(() => {
+    let alive = true;
+    let vid = "";
+    try {
+      vid = localStorage.getItem("leetfut:vid") || "";
+      if (!vid) {
+        vid =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        localStorage.setItem("leetfut:vid", vid);
+      }
+    } catch {}
+
+    const apply = (d: { visitors?: ScoutHistoryPoint[] | null; cards?: number | null } | null) => {
+      if (!alive || !d) return;
+      if (Array.isArray(d.visitors)) setHistory(d.visitors);
+      if (typeof d.cards === "number") setCards(d.cards);
+    };
+
+    // Register once (returns the updated numbers), then poll read-only for live
+    // updates from other visitors / new cards.
+    fetch("/api/visit", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ vid }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(apply)
+      .catch(() => {});
+
+    const id = setInterval(() => {
+      fetch("/api/visit")
+        .then((r) => (r.ok ? r.json() : null))
+        .then(apply)
+        .catch(() => {});
+    }, 15000);
+
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, []);
+
   // Mark this tab as "has visited home" so a scouted card shows BACK, while a
   // directly-opened / shared card link (no home visit) shows a "make your card"
   // CTA instead. sessionStorage is per-tab, so a fresh tab from a share is direct.
@@ -78,7 +129,7 @@ export default function AppShell({
           <ScoutForm
             loading={isPending}
             error={null}
-            scoutCount={scoutCount}
+            scoutCount={cards}
             onScout={handleScout}
             onOpenModal={() => setModalOpen(true)}
           />
@@ -86,7 +137,7 @@ export default function AppShell({
         </div>
         {/* users-over-time sparkline — below the card fan, above the footer
             credit / inspired-by badge. Renders nothing until history exists. */}
-        <ScoutGraph history={scoutHistory} />
+        <ScoutGraph history={history} />
         <footer className="relative z-[2] mt-auto flex flex-none flex-col items-center gap-[10px] p-[clamp(12px,2.6vh,24px)]">
           <FooterCredit />
         </footer>
