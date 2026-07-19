@@ -216,6 +216,6 @@ export async function renderCardImage(card: Card): Promise<ImageResponse> {
     width: EMBED_W,
     height: cardH(EMBED_W),
     fonts: assets.fonts,
-    headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800" },
+    headers: { "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=86400" },
   });
 }
