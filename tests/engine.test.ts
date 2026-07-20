@@ -132,6 +132,30 @@ describe("buildCard — the icon allowlist", () => {
   });
 });
 
+describe("buildCard — submissions, contest attendance and rank", () => {
+  it("ranks more-solved above fewer-solved even when the latter has more submissions and a thin contest rating", () => {
+    // A: fewer solved, more submissions (lower acceptance), rating from just 2 rounds.
+    const a = sig({ login: "a", total_solved: 223, easy_solved: 120, medium_solved: 85, hard_solved: 18, total_submissions: 578, acceptance_rate: 39, contest_rating: 1650, contest_attended: 2 });
+    // B: more solved, fewer submissions (higher acceptance), no contests.
+    const b = sig({ login: "b", total_solved: 333, easy_solved: 131, medium_solved: 164, hard_solved: 38, total_submissions: 560, acceptance_rate: 59, contest_rating: 0, contest_attended: 0 });
+    expect(buildCard(b).overall).toBeGreaterThan(buildCard(a).overall);
+  });
+
+  it("gates the contest rating by attendance — a rating from 1-2 contests scores far below the same rating over a full season", () => {
+    const thin = sig({ contest_rating: 1750, contest_attended: 2 });
+    const seasoned = sig({ contest_rating: 1750, contest_attended: 40 });
+    expect(buildCard(seasoned).overall).toBeGreaterThan(buildCard(thin).overall + 5);
+    // The contest stat itself should stay near neutral on a 2-contest sample.
+    expect(buildCard(thin).stats.pas).toBeLessThan(buildCard(seasoned).stats.pas);
+  });
+
+  it("factors in global rank — a top rank scores above a tail rank, all else equal", () => {
+    const top = sig({ ranking: 20_000 });
+    const tail = sig({ ranking: 2_000_000 });
+    expect(buildCard(top).overall).toBeGreaterThan(buildCard(tail).overall);
+  });
+});
+
 describe("buildCard — shape steers the role", () => {
   it("reads a hard-tier grinder as HRD-led with a hard-tier archetype", () => {
     // Huge hard count with the volume that comes with it -> HRD (sho) rides high
