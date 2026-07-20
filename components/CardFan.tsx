@@ -57,7 +57,7 @@ export default function CardFan({ cards, onPick }: Props) {
           return (
             <div
               key={card.login}
-              className="absolute left-1/2 top-[18px] w-[184px] origin-bottom transition-transform duration-[450ms] ease-[cubic-bezier(.2,.8,.2,1)] max-[860px]:static max-[860px]:w-[min(230px,66vw)] max-[860px]:!transform-none max-[860px]:!z-auto"
+              className="absolute left-1/2 top-[18px] w-[184px] origin-bottom transition-transform duration-[450ms] ease-[cubic-bezier(.2,.8,.2,1)] max-[860px]:relative max-[860px]:w-[min(230px,66vw)] max-[860px]:!left-auto max-[860px]:!top-auto max-[860px]:!transform-none max-[860px]:!z-auto"
               style={{
                 transform: `translateX(-50%) translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(${sc})`,
                 zIndex: hovered ? 60 : 40 - i * 5,
