@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { after } from "next/server";
 import { redis } from "./redis";
 import { buildCard } from "./scoring/engine";
 import { fetchProfile, type ScoutError } from "./leetcode/client";
@@ -143,6 +144,17 @@ function revalidateInBackground(username: string, login: string): void {
     console.error("[scout] background revalidate failed:", (e as ScoutError)?.message ?? e);
   });
   inflight.set(login, pending);
+  // On serverless (Vercel) the invocation freezes once the response is sent, which
+  // would kill this fire-and-forget refresh and strand the stale card until the
+  // hard TTL (hours). `after` keeps the function alive until the refresh writes the
+  // cache. On a long-running server (pm2) it's just a post-response callback.
+  // Guarded: called outside a request scope `after` throws — there the detached
+  // promise above already does the job.
+  try {
+    after(() => pending.catch(() => {}));
+  } catch {
+    /* not in a request scope — the fire-and-forget promise above is sufficient */
+  }
 }
 
 // Username -> Card, Redis-cached. Throws the same ScoutError as fetchProfile
