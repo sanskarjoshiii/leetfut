@@ -22,6 +22,19 @@ const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, x
 const mean = (a: number[]) => a.reduce((s, x) => s + x, 0) / a.length;
 const vals = (s: Profile) => STATS.map((k) => s[k]);
 
+// Contest rating only earns its weight once it's backed by a real sample of
+// rounds — a strong rating from 1-2 contests is noise, not standing. Ramps 0→1
+// across the first K.contest.full contests, so 1/2/4 attended barely counts and
+// only a genuine competitor (~a full season) gets the whole contest boost.
+const contestFactor = (attended: number) => clamp(attended / K.contest.full, 0, 1);
+const effContest = (s: Signals) => s.contest_rating * contestFactor(s.contest_attended);
+
+// Global problem-solving rank → a 0..1 standing signal (elite ≈ 1, tail ≈ 0).
+// LeetCode ranks reach the millions, so it's log-scaled; 0 when unranked, so a
+// missing rank neither helps nor hurts.
+const rankStanding = (ranking: number) =>
+  ranking > 0 ? clamp((K.rank.zero - Lg(ranking)) / K.rank.span, 0, 1) : 0;
+
 // §2 — raw estimates, tuned so the six land on a comparable scale.
 // pac=Consistency, sho=Hard mastery, pas=Contest, dri=Versatility,
 // def=Accuracy, phy=Volume (see STAT_LABELS in constants).
@@ -31,9 +44,11 @@ function rawStats(s: Signals): Stats {
     pac: 30 + 10 * Lg(s.streak) + 8 * Lg(s.active_days),
     // Hard mastery — solving the hard tier, log-scaled (400 hard ≈ 87).
     sho: 30 + 22 * Lg(s.hard_solved),
-    // Contest — the contest rating, mapped from a ~1400 floor. Non-contestants
-    // sit at a neutral 25 rather than being zeroed into a permanent Anchor.
-    pas: s.contest_rating > 0 ? 20 + (s.contest_rating - 1400) / 15 : 25,
+    // Contest — the contest rating, mapped from a ~1400 floor, but only to the
+    // extent it's earned across many rounds: a rating from 1-2 contests stays
+    // near the neutral 25 (see contestFactor). Non-contestants sit at 25 too,
+    // rather than being zeroed into a permanent Anchor.
+    pas: s.contest_rating > 0 ? 25 + contestFactor(s.contest_attended) * (20 + (s.contest_rating - 1400) / 15 - 25) : 25,
     // Versatility — genuine range across topics and languages, sqrt-scaled so
     // breadth has diminishing returns instead of one noisy signal owning the card.
     dri: 45 + 6 * Math.sqrt(s.topics) + 3 * Math.min(s.languages, 10),
@@ -50,13 +65,14 @@ function rawStats(s: Signals): Stats {
 // signals that read as overall standing: total & hard solved, contest rating,
 // and years active.
 function center(s: Signals): number {
-  const { w1, w2, w3, w4, w5, b, lo, hi } = K.magnitude;
+  const { w1, w2, w3, w4, w5, w6, b, lo, hi } = K.magnitude;
   const M = sigmoid(
     w1 * Lg(s.total_solved) +
       w2 * Lg(s.hard_solved) +
-      w3 * s.contest_rating +
+      w3 * effContest(s) + // attendance-gated: a thin contest rating can't inflate the card
       w4 * s.active_years +
       w5 * Lg(s.badges) +
+      w6 * rankStanding(s.ranking) + // global standing among all solvers
       b,
   );
   return lerp(lo, hi, M);
@@ -138,7 +154,7 @@ function legacyScore(s: Signals): number {
   const z =
     a * Math.log(s.active_years + 1) +
     b * Math.min(s.active_years, activeCap) +
-    c * (s.contest_rating / 1000) +
+    c * (effContest(s) / 1000) + // attendance-gated contest standing
     d * Lg(s.total_solved) +
     e * Lg(s.hard_solved) +
     g * Lg(s.badges) -

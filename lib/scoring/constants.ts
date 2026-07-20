@@ -38,11 +38,20 @@ export const STAT_NAMES: Record<StatKey, string> = {
 export const ATTACK_STATS: StatKey[] = ["pac", "sho", "pas", "dri"];
 
 export const K = {
+  // Contests needed before a contest rating counts at full weight (engine
+  // .contestFactor). Attending 1/2/4 rounds ramps in only ~a tenth to a third,
+  // so a strong rating from a couple of contests can't inflate the score.
+  contest: { full: 12 },
+  // Global-rank standing curve (engine.rankStanding): rank whose log10 == `zero`
+  // scores 0; each `span` decades better adds 1 (clamped 0..1). zero 6.6 ≈ the
+  // multi-million tail; roughly sub-10k saturates.
+  rank: { zero: 6.6, span: 3.0 },
   // Gravity-well center from overall standing: total solved, hard solved,
-  // contest rating, years active and earned badges (100/365-day, contest &
-  // study-plan badges — a real achievement signal). b re-centers; lo/hi set the
-  // band the card sits in — raised so an active solver lands honestly higher.
-  magnitude: { w1: 0.5, w2: 0.7, w3: 0.0009, w4: 0.08, w5: 0.25, b: -3.0, lo: 50, hi: 85 },
+  // attendance-gated contest rating, years active, earned badges (100/365-day,
+  // contest & study-plan badges) and global rank (w6). b re-centers; lo/hi set
+  // the band the card sits in. b is nudged to absorb the new rank term so the
+  // typical card keeps its level while rank now separates top from tail.
+  magnitude: { w1: 0.5, w2: 0.7, w3: 0.0009, w4: 0.08, w5: 0.25, w6: 0.9, b: -3.25, lo: 50, hi: 85 },
   tension: {
     alpha: 0.7,
     pairs: [
